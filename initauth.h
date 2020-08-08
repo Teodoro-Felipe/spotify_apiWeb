@@ -2,10 +2,12 @@
 #define INITAUTH_H
 
 #include <QDialog>
+#include <memory>
 
-QT_BEGIN_NAMESPACE
-namespace Ui { class InitAuth; }
-QT_END_NAMESPACE
+namespace Ui
+{ class InitAuth;}
+
+class AuthRequests;
 
 class InitAuth : public QDialog
 {
@@ -15,7 +17,14 @@ public:
     InitAuth(QWidget *parent = nullptr);
     ~InitAuth();
 
+private slots:
+    void treatButtonAuth();
+
+    void treatAnswer(bool auth);
+
 private:
     Ui::InitAuth *ui;
+
+    std::shared_ptr<AuthRequests> authRequests;
 };
 #endif // INITAUTH_H
