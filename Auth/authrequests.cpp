@@ -41,6 +41,54 @@ bool AuthRequests::init()
     return true;
 }
 
+void AuthRequests::getInfoUser(funcReturn func)
+{
+    QUrl url("https://api.spotify.com/v1/me");
+    auto reply = Auth->get(url);
+
+    connect(reply, &QNetworkReply::finished, [=]()
+    {
+        if (reply->error() != QNetworkReply::NoError)
+        {
+            func(-1, {});
+            return;
+        }
+        const auto dados = reply->readAll();
+
+        auto document = QJsonDocument::fromJson(dados);
+        auto jObj = document.object();
+        userName = jObj.value("id").toString();
+        func(0, {});
+
+        reply->deleteLater();
+    });
+}
+
+void AuthRequests::getPlayListsWithUser(funcReturn func)
+{
+    if(userName.isEmpty())
+    {
+        func(-1, {});
+        return;
+    }
+
+    QUrl url("https://api.spotify.com/v1/users/" + userName + "/playlists");
+    auto reply = Auth->get(url);
+
+    connect (reply, &QNetworkReply::finished, [=]()
+    {
+        if (reply->error() != QNetworkReply::NoError)
+        {
+            func(-1, {});
+            return;
+        }
+        const auto data = reply->readAll();
+        func(0, data);
+
+        reply->deleteLater();
+    });
+}
+
 void AuthRequests::callbackAuth()
 {
     bool status = Auth->status() == QAbstractOAuth::Status::Granted ? true : false;
