@@ -6,6 +6,9 @@ CONFIG += c++17
 
 DEFINES += QT_DEPRECATED_WARNINGS
 
+LIBS += -L$$PWD\lib -lcrypto-1_1 -lssl-1_1
+INCLUDEPATH+= $$PWD\lib\include
+
 SOURCES += \
     Auth/authrequests.cpp \
     main.cpp \
