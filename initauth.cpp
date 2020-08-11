@@ -38,7 +38,7 @@ void InitAuth::treatAnswer(bool auth)
 {
     if(auth)
     {
-        MainScreen *telaP = new MainScreen;
+        MainScreen *telaP = new MainScreen(std::move(authRequests));
         telaP->show();
         close();
     }
