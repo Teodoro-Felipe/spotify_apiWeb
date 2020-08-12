@@ -33,7 +33,26 @@ MainScreen::~MainScreen()
 
 void MainScreen::treatCriarPlay()
 {
+    if(userIsReady.load())
+    {
+        Structs::PlayList playList;
+        if(ui->lineEdit->text().isEmpty())
+        {
+            return;
+        }
+        QString txtLine = ui->lineEdit->text();
+        playList.name = txtLine;
+        playList.descript = "Essa PlayList foi criada com o nome : " + txtLine;
 
+        authRequest->createPlayList(playList, [=](int ret, QByteArray data)
+        {
+            if(ret < 0)
+            {
+                Q_UNUSED(data)
+                qDebug() << "Erro ao criar play list";
+            }
+        });
+    }
 }
 
 void MainScreen::treatAddMusic()
@@ -53,7 +72,18 @@ void MainScreen::treatExecPlayList()
 
 void MainScreen::treatSearchMusic()
 {
+    if(userIsReady.load())
+    {
+        QString nameMusic = ui->lineEdit->text();
 
+        authRequest->getMusicWithName(nameMusic, [=](int ret, QByteArray data)
+        {
+            if(ret < 0)
+            {
+                qDebug() << "Erro ao get Music";
+            }
+        });
+    }
 }
 
 void MainScreen::initList()
@@ -64,7 +94,14 @@ void MainScreen::initList()
         {
             if(ret > 0)
             {
+                QJsonDocument document = QJsonDocument::fromJson(data);
+                QJsonObject obj = document.object();
+                QJsonArray array = obj.value("items").toArray();
 
+                for(int i = 0; i < array.size(); i++)
+                {
+                    qDebug() << array[i].toObject().value("name").toString();
+                }
             }
         });
     }

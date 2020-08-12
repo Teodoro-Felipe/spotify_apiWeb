@@ -5,6 +5,8 @@
 #include <QOAuth2AuthorizationCodeFlow>
 #include <memory>
 
+#include "defines.h"
+
 class AuthRequests : public QObject
 {
     Q_OBJECT
@@ -23,6 +25,10 @@ public:
     void getInfoUser(funcReturn func);
 
     void getPlayListsWithUser(funcReturn func);
+
+    void getMusicWithName(QString nameMusic, funcReturn func);
+
+    void createPlayList(Structs::PlayList playList, funcReturn func);
 
 private slots:
     void callbackAuth();

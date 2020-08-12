@@ -1,5 +1,4 @@
 #include "authrequests.h"
-#include "defines.h"
 
 #include <QDebug>
 #include <QtNetworkAuth>
@@ -74,6 +73,61 @@ void AuthRequests::getPlayListsWithUser(funcReturn func)
 
     QUrl url("https://api.spotify.com/v1/users/" + userName + "/playlists");
     auto reply = Auth->get(url);
+
+    connect (reply, &QNetworkReply::finished, [=]()
+    {
+        if (reply->error() != QNetworkReply::NoError)
+        {
+            func(-1, {});
+            return;
+        }
+        const auto data = reply->readAll();
+        func(0, data);
+
+        reply->deleteLater();
+    });
+}
+
+void AuthRequests::getMusicWithName(QString nameMusic, AuthRequests::funcReturn func)
+{
+    if(userName.isEmpty())
+    {
+        func(-1, {});
+        return;
+    }
+
+    QUrl url("https://api.spotify.com/v1/search?q="+ nameMusic +"&type=track&market=US&limit=1");
+    auto reply = Auth->get(url);
+
+    connect (reply, &QNetworkReply::finished, [=]()
+    {
+        if (reply->error() != QNetworkReply::NoError)
+        {
+            func(-1, {});
+            return;
+        }
+        const auto data = reply->readAll();
+        func(0, data);
+
+        reply->deleteLater();
+    });
+}
+
+void AuthRequests::createPlayList(Structs::PlayList playList, AuthRequests::funcReturn func)
+{
+    if(userName.isEmpty())
+    {
+        func(-1, {});
+        return;
+    }
+
+    QJsonObject obj;
+    obj.insert("name", playList.name);
+    obj.insert("description", playList.descript);
+    obj.insert("public", playList.isPublic);
+
+    QUrl url("https://api.spotify.com/v1/users/" + userName + "/playlists");
+    auto reply = Auth->post(url, QJsonDocument(obj).toJson());
 
     connect (reply, &QNetworkReply::finished, [=]()
     {
