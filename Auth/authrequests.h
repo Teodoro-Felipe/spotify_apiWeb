@@ -26,7 +26,15 @@ public:
 
     void getPlayListsWithUser(funcReturn func);
 
+    void addMusicPlayList(QString uriMusic, QString playList, funcReturn func);
+
+    void delMusicPlayList(QString uriMusic, QString playList, funcReturn func);
+
+    void PlayMusic(QString uriMusic, funcReturn func);
+
     void getMusicWithName(QString nameMusic, funcReturn func);
+
+    void getMusicWithPlayList(QString idPlayList, funcReturn func);
 
     void createPlayList(Structs::PlayList playList, funcReturn func);
 

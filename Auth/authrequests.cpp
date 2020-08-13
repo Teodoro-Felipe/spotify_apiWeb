@@ -88,6 +88,97 @@ void AuthRequests::getPlayListsWithUser(funcReturn func)
     });
 }
 
+void AuthRequests::addMusicPlayList(QString uriMusic, QString playList, AuthRequests::funcReturn func)
+{
+    if(uriMusic.isEmpty() || playList.isEmpty())
+    {
+        func(-1, {});
+        return;
+    }
+
+    QUrl url("https://api.spotify.com/v1/playlists/"+ playList +"/tracks?uris=spotify%3Atrack%3A"+uriMusic);
+    auto reply = Auth->post(url);
+
+    connect (reply, &QNetworkReply::finished, [=]()
+    {
+        if (reply->error() != QNetworkReply::NoError)
+        {
+            func(-1, {});
+            return;
+        }
+        const auto data = reply->readAll();
+        func(0, data);
+
+        reply->deleteLater();
+    });
+}
+
+void AuthRequests::delMusicPlayList(QString uriMusic, QString playList, AuthRequests::funcReturn func)
+{
+    if(uriMusic.isEmpty() || playList.isEmpty())
+    {
+        func(-1, {});
+        return;
+    }
+
+    QJsonObject obj;
+    obj.insert("uri", "spotify:track:"+uriMusic);
+
+    QJsonArray array;
+    array.append(obj);
+
+    QJsonObject objArray;
+    objArray.insert("tracks", array);
+
+    QUrl url("https://api.spotify.com/v1/playlists/"+ playList +"/tracks");
+    auto reply = Auth->post(url, QJsonDocument(objArray).toJson());
+
+    connect (reply, &QNetworkReply::finished, [=]()
+    {
+        if (reply->error() != QNetworkReply::NoError)
+        {
+            func(-1, {});
+            return;
+        }
+        const auto data = reply->readAll();
+        func(0, data);
+
+        reply->deleteLater();
+    });
+}
+
+void AuthRequests::PlayMusic(QString uriMusic, AuthRequests::funcReturn func)
+{
+    if(uriMusic.isEmpty())
+    {
+        func(-1, {});
+        return;
+    }
+
+    QJsonArray array;
+    array.append("spotify:track:"+uriMusic);
+
+    QJsonObject obj;
+    obj.insert("uris", array);
+
+    QUrl url("https://api.spotify.com/v1/me/player/play");
+    auto reply = Auth->put(url, QJsonDocument(obj).toJson());
+
+    connect (reply, &QNetworkReply::finished, [=]()
+    {
+        if (reply->error() != QNetworkReply::NoError)
+        {
+            qDebug() << reply->readAll();
+            func(-1, {});
+            return;
+        }
+        const auto data = reply->readAll();
+        func(0, data);
+
+        reply->deleteLater();
+    });
+}
+
 void AuthRequests::getMusicWithName(QString nameMusic, AuthRequests::funcReturn func)
 {
     if(userName.isEmpty())
@@ -111,6 +202,11 @@ void AuthRequests::getMusicWithName(QString nameMusic, AuthRequests::funcReturn 
 
         reply->deleteLater();
     });
+}
+
+void AuthRequests::getMusicWithPlayList(QString idPlayList, AuthRequests::funcReturn func)
+{
+
 }
 
 void AuthRequests::createPlayList(Structs::PlayList playList, AuthRequests::funcReturn func)

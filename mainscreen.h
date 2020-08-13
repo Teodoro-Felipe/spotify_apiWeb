@@ -29,11 +29,11 @@ private slots:
 
     void treatSearchMusic();
 
-    void treatSelPlayList();
+    void treatSelPlayList(int currentRow, int currentColumn, int previousRow, int previousColumn);
 
 private:
 
-    void initList();
+    void LoadList();
 
     void getInfoUser();
 
@@ -41,6 +41,9 @@ private:
 
     std::shared_ptr<AuthRequests> authRequest;
     std::atomic_bool userIsReady;
+
+    QString idCurrentMusic;
+    QString idCurrentPlayList;
 };
 
 #endif // MAINSCREEN_H

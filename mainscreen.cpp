@@ -22,6 +22,7 @@ MainScreen::MainScreen(std::shared_ptr<AuthRequests> auth, QWidget *parent) :
     connect(ui->delMusic, &QPushButton::clicked, this, &MainScreen::treatDelMusic);
     connect(ui->execPlayList, &QPushButton::clicked, this, &MainScreen::treatExecPlayList);
     connect(ui->searchMusic, &QPushButton::clicked, this, &MainScreen::treatSearchMusic);
+    connect(ui->tablePlayList, &QTableWidget::currentCellChanged, this, &MainScreen::treatSelPlayList);
 
     getInfoUser();
 }
@@ -51,23 +52,75 @@ void MainScreen::treatCriarPlay()
                 Q_UNUSED(data)
                 qDebug() << "Erro ao criar play list";
             }
+
+            ui->lineEdit->clear();
+            LoadList();
         });
     }
 }
 
 void MainScreen::treatAddMusic()
 {
+    if(userIsReady.load())
+    {
+        if(idCurrentMusic.isEmpty() || idCurrentPlayList.isEmpty())
+        {
+            return;
+        }
 
+        authRequest->addMusicPlayList(idCurrentMusic, idCurrentPlayList, [=](int ret, QByteArray data)
+        {
+            if(ret < 0)
+            {
+                Q_UNUSED(data)
+                qDebug() << "Erro ao adicionar musica a playlist";
+            }
+
+            ui->lineEdit->clear();
+            idCurrentMusic.clear();
+        });
+    }
 }
 
 void MainScreen::treatDelMusic()
 {
+    if(userIsReady.load())
+    {
+        if(idCurrentMusic.isEmpty() || idCurrentPlayList.isEmpty())
+        {
+            return;
+        }
 
+        authRequest->delMusicPlayList(idCurrentMusic, idCurrentPlayList, [=](int ret, QByteArray data)
+        {
+            if(ret < 0)
+            {
+                Q_UNUSED(data)
+                qDebug() << "Erro ao criar play list";
+            }
+        });
+    }
 }
 
 void MainScreen::treatExecPlayList()
 {
+    if(userIsReady.load())
+    {
+        if(ui->lineEdit->text().isEmpty() || idCurrentMusic.isEmpty())
+        {
+            qDebug() << "Error";
+            return;
+        }
 
+        authRequest->PlayMusic(idCurrentMusic, [=](int ret, QByteArray data)
+        {
+            if(ret < 0)
+            {
+                Q_UNUSED(data)
+                qDebug() << "Erro ao play music";
+            }
+        });
+    }
 }
 
 void MainScreen::treatSearchMusic()
@@ -75,32 +128,58 @@ void MainScreen::treatSearchMusic()
     if(userIsReady.load())
     {
         QString nameMusic = ui->lineEdit->text();
-
         authRequest->getMusicWithName(nameMusic, [=](int ret, QByteArray data)
         {
             if(ret < 0)
             {
                 qDebug() << "Erro ao get Music";
+                return;
             }
+
+            QJsonDocument document = QJsonDocument::fromJson(data);
+            QJsonObject obj = document.object();
+            QJsonObject obj2 = obj.value("tracks").toObject();
+
+            QJsonArray array = obj2.value("items").toArray();
+
+            ui->lineEdit->setText(array[0].toObject().value("name").toString());
+            idCurrentMusic = array[0].toObject().value("id").toString();
         });
     }
 }
 
-void MainScreen::initList()
+void MainScreen::treatSelPlayList(int currentRow, int currentColumn, int previousRow, int previousColumn)
+{
+    Q_UNUSED(previousRow)
+    Q_UNUSED(previousColumn)
+
+    if(currentRow < 0)
+    {
+        return;
+    }
+    idCurrentPlayList = ui->tablePlayList->item(currentRow, currentColumn)->data(Qt::UserRole).toString();
+}
+
+void MainScreen::LoadList()
 {
     if(userIsReady.load())
     {
         authRequest->getPlayListsWithUser([=](int ret, QByteArray data)
         {
-            if(ret > 0)
+            if(ret >= 0)
             {
                 QJsonDocument document = QJsonDocument::fromJson(data);
                 QJsonObject obj = document.object();
                 QJsonArray array = obj.value("items").toArray();
 
+                ui->tablePlayList->clearContents();
+
+                ui->tablePlayList->setRowCount(array.size());
                 for(int i = 0; i < array.size(); i++)
                 {
-                    qDebug() << array[i].toObject().value("name").toString();
+                    QTableWidgetItem *item = new QTableWidgetItem(array[i].toObject().value("name").toString());
+                    item->setData(Qt::UserRole, array[i].toObject().value("id").toString());
+                    ui->tablePlayList->setItem(i, 0, item);
                 }
             }
         });
@@ -112,10 +191,10 @@ void MainScreen::getInfoUser()
     authRequest->getInfoUser([=](int ret, QByteArray data)
     {
         Q_UNUSED(data)
-        if(ret > 0)
+        if(ret >= 0)
         {
             userIsReady.store(true);
-            initList();
+            LoadList();
         }
     });
 }

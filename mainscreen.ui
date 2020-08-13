@@ -6,20 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>415</width>
-    <height>264</height>
+    <width>410</width>
+    <height>356</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>415</width>
-    <height>264</height>
+    <width>410</width>
+    <height>356</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>415</width>
-    <height>264</height>
+    <width>410</width>
+    <height>356</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -30,10 +30,30 @@
     <rect>
      <x>10</x>
      <y>66</y>
-     <width>281</width>
+     <width>251</width>
      <height>192</height>
     </rect>
    </property>
+   <property name="editTriggers">
+    <set>QAbstractItemView::SelectedClicked</set>
+   </property>
+   <property name="tabKeyNavigation">
+    <bool>false</bool>
+   </property>
+   <property name="showDropIndicator" stdset="0">
+    <bool>false</bool>
+   </property>
+   <property name="dragDropOverwriteMode">
+    <bool>false</bool>
+   </property>
+   <attribute name="horizontalHeaderDefaultSectionSize">
+    <number>277</number>
+   </attribute>
+   <column>
+    <property name="text">
+     <string>Minhas PlayList</string>
+    </property>
+   </column>
   </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
@@ -97,7 +117,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Executar PlayList</string>
+    <string>Executar Musica</string>
    </property>
   </widget>
   <widget class="QPushButton" name="searchMusic">
@@ -135,6 +155,114 @@
    <property name="text">
     <string>Nome da PlayList</string>
    </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>265</x>
+     <y>64</y>
+     <width>31</width>
+     <height>191</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string/>
+   </property>
+   <widget class="QRadioButton" name="checkCriar">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>7</y>
+      <width>84</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="checkAdd">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>48</y>
+      <width>84</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="checkDel">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>87</y>
+      <width>84</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="checkPlay">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>128</y>
+      <width>84</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="checkGet">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>167</y>
+      <width>84</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QTableWidget" name="tableMusic">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>260</y>
+     <width>391</width>
+     <height>91</height>
+    </rect>
+   </property>
+   <property name="editTriggers">
+    <set>QAbstractItemView::SelectedClicked</set>
+   </property>
+   <property name="tabKeyNavigation">
+    <bool>false</bool>
+   </property>
+   <property name="showDropIndicator" stdset="0">
+    <bool>false</bool>
+   </property>
+   <property name="dragDropOverwriteMode">
+    <bool>false</bool>
+   </property>
+   <attribute name="horizontalHeaderDefaultSectionSize">
+    <number>388</number>
+   </attribute>
+   <column>
+    <property name="text">
+     <string>Musicas da PlayList</string>
+    </property>
+   </column>
   </widget>
  </widget>
  <resources/>
