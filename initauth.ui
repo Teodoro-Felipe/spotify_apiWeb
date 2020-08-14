@@ -22,6 +22,9 @@
      <height>21</height>
     </rect>
    </property>
+   <property name="text">
+    <string>e1a0086ee40a41e3a5e1e7df4f6bf301</string>
+   </property>
   </widget>
   <widget class="QLineEdit" name="lineSecretClient">
    <property name="geometry">
@@ -31,6 +34,9 @@
      <width>251</width>
      <height>21</height>
     </rect>
+   </property>
+   <property name="text">
+    <string>972b8aac33d24c30ae5cb92946382a4b</string>
    </property>
   </widget>
   <widget class="QPushButton" name="Auth">

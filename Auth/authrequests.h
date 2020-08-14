@@ -38,6 +38,9 @@ public:
 
     void createPlayList(Structs::PlayList playList, funcReturn func);
 
+    QNetworkReply *deleteReimplement(const QNetworkRequest &request, const QByteArray &data);
+
+    QNetworkRequest createRequest(QUrl url, const QVariantMap *parameters);
 private slots:
     void callbackAuth();
 

@@ -136,18 +136,21 @@
   <widget class="QLineEdit" name="lineEdit">
    <property name="geometry">
     <rect>
-     <x>200</x>
-     <y>30</y>
-     <width>201</width>
+     <x>10</x>
+     <y>20</y>
+     <width>391</width>
      <height>21</height>
     </rect>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
    </property>
   </widget>
   <widget class="QLabel" name="labelName">
    <property name="geometry">
     <rect>
-     <x>210</x>
-     <y>10</y>
+     <x>170</x>
+     <y>3</y>
      <width>181</width>
      <height>16</height>
     </rect>
@@ -260,7 +263,7 @@
    </attribute>
    <column>
     <property name="text">
-     <string>Musicas da PlayList</string>
+     <string>Musicas</string>
     </property>
    </column>
   </widget>

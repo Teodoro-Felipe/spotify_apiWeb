@@ -31,6 +31,10 @@ private slots:
 
     void treatSelPlayList(int currentRow, int currentColumn, int previousRow, int previousColumn);
 
+    void treatSelMusic(int currentRow, int currentColumn, int previousRow, int previousColumn);
+
+    void treatCheck();
+
 private:
 
     void LoadList();

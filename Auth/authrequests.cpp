@@ -121,22 +121,27 @@ void AuthRequests::delMusicPlayList(QString uriMusic, QString playList, AuthRequ
         return;
     }
 
-    QJsonObject obj;
-    obj.insert("uri", "spotify:track:"+uriMusic);
+    QVariantMap mp;
 
-    QJsonArray array;
-    array.append(obj);
+    QJsonArray people;
+     QJsonObject bob;
+     bob.insert("uri", "spotify:track:"+uriMusic);
 
-    QJsonObject objArray;
-    objArray.insert("tracks", array);
+     people.push_back(bob);
 
+     mp.insert("tracks", people);
+    QByteArray array;
+
+    qDebug() << QJsonDocument::fromVariant(mp);
     QUrl url("https://api.spotify.com/v1/playlists/"+ playList +"/tracks");
-    auto reply = Auth->post(url, QJsonDocument(objArray).toJson());
+    QNetworkRequest req = QNetworkRequest(url);
+    auto reply = deleteReimplement(req, QJsonDocument(people).toJson());
 
     connect (reply, &QNetworkReply::finished, [=]()
     {
         if (reply->error() != QNetworkReply::NoError)
         {
+            qDebug() << reply->readAll();
             func(-1, {});
             return;
         }
@@ -187,7 +192,7 @@ void AuthRequests::getMusicWithName(QString nameMusic, AuthRequests::funcReturn 
         return;
     }
 
-    QUrl url("https://api.spotify.com/v1/search?q="+ nameMusic +"&type=track&market=US&limit=1");
+    QUrl url("https://api.spotify.com/v1/search?q="+ nameMusic +"&type=track&market=US&limit=5");
     auto reply = Auth->get(url);
 
     connect (reply, &QNetworkReply::finished, [=]()
@@ -206,7 +211,27 @@ void AuthRequests::getMusicWithName(QString nameMusic, AuthRequests::funcReturn 
 
 void AuthRequests::getMusicWithPlayList(QString idPlayList, AuthRequests::funcReturn func)
 {
+    if(userName.isEmpty())
+    {
+        func(-1, {});
+        return;
+    }
 
+    QUrl url("https://api.spotify.com/v1/playlists/"+idPlayList+"/tracks");
+    auto reply = Auth->get(url);
+
+    connect (reply, &QNetworkReply::finished, [=]()
+    {
+        if (reply->error() != QNetworkReply::NoError)
+        {
+            func(-1, {});
+            return;
+        }
+        const auto data = reply->readAll();
+        func(0, data);
+
+        reply->deleteLater();
+    });
 }
 
 void AuthRequests::createPlayList(Structs::PlayList playList, AuthRequests::funcReturn func)
@@ -237,6 +262,34 @@ void AuthRequests::createPlayList(Structs::PlayList playList, AuthRequests::func
 
         reply->deleteLater();
     });
+}
+
+QNetworkReply *AuthRequests::deleteReimplement(const QNetworkRequest &request, const QByteArray &data)
+{
+    QBuffer *buffer = new QBuffer;
+    buffer->setData(data);
+    buffer->open(QIODevice::ReadOnly);
+    QNetworkAccessManager manager;
+
+    QNetworkReply *reply = manager.post(request, buffer);
+    buffer->setParent(reply);
+    return reply;
+}
+
+QNetworkRequest AuthRequests::createRequest(QUrl url, const QVariantMap *parameters)
+{
+//    QNetworkRequest req;
+//     req.postProcess(createRequest(QNetworkAccessManager::PostOperation, request, data));
+
+//    QUrlQuery query(url.query());
+//    QNetworkRequest request;
+//    if (parameters) {
+//        for (auto it = parameters->begin(), end = parameters->end(); it != end; ++it)
+//            query.addQueryItem(it.key(), it.value().toString());
+//        url.setQuery(query);
+
+//        qDebug() << url;
+//    }
 }
 
 void AuthRequests::callbackAuth()

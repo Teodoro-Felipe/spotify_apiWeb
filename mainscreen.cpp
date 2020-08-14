@@ -23,6 +23,9 @@ MainScreen::MainScreen(std::shared_ptr<AuthRequests> auth, QWidget *parent) :
     connect(ui->execPlayList, &QPushButton::clicked, this, &MainScreen::treatExecPlayList);
     connect(ui->searchMusic, &QPushButton::clicked, this, &MainScreen::treatSearchMusic);
     connect(ui->tablePlayList, &QTableWidget::currentCellChanged, this, &MainScreen::treatSelPlayList);
+    connect(ui->tableMusic, &QTableWidget::currentCellChanged, this, &MainScreen::treatSelMusic);
+
+    //connect(ui->)
 
     getInfoUser();
 }
@@ -142,8 +145,18 @@ void MainScreen::treatSearchMusic()
 
             QJsonArray array = obj2.value("items").toArray();
 
-            ui->lineEdit->setText(array[0].toObject().value("name").toString());
-            idCurrentMusic = array[0].toObject().value("id").toString();
+            ui->tableMusic->clearContents();
+
+            ui->tableMusic->setRowCount(array.size());
+            for(int i = 0; i < array.size(); i++)
+            {
+                QJsonArray artist = array[i].toObject().value("artists").toArray();
+                QString nameArt = artist[0].toObject().value("name").toString();
+
+                QTableWidgetItem *item = new QTableWidgetItem(array[i].toObject().value("name").toString() + " - " + nameArt);
+                item->setData(Qt::UserRole, array[i].toObject().value("id").toString());
+                ui->tableMusic->setItem(i, 0, item);
+            }
         });
     }
 }
@@ -158,6 +171,50 @@ void MainScreen::treatSelPlayList(int currentRow, int currentColumn, int previou
         return;
     }
     idCurrentPlayList = ui->tablePlayList->item(currentRow, currentColumn)->data(Qt::UserRole).toString();
+
+    authRequest->getMusicWithPlayList(idCurrentPlayList,[=](int ret, QByteArray data)
+    {
+        if(ret < 0)
+        {
+            return;
+        }
+        QJsonDocument document = QJsonDocument::fromJson(data);
+        QJsonObject obj = document.object();
+        QJsonArray array = obj.value("items").toArray();
+
+        ui->tableMusic->clearContents();
+
+        ui->tableMusic->setRowCount(array.size());
+        for(int i = 0; i < array.size(); i++)
+        {
+            QJsonObject track = array[i].toObject().value("track").toObject();
+
+            QJsonArray artist = track.value("artists").toArray();
+            QString nameArt = artist[0].toObject().value("name").toString();
+
+            QTableWidgetItem *item = new QTableWidgetItem(track.value("name").toString() + " - " + nameArt);
+            item->setData(Qt::UserRole, track.value("id").toString());
+            ui->tableMusic->setItem(i, 0, item);
+        }
+    });
+}
+
+void MainScreen::treatSelMusic(int currentRow, int currentColumn, int previousRow, int previousColumn)
+{
+    Q_UNUSED(previousRow)
+    Q_UNUSED(previousColumn)
+
+    if(currentRow < 0)
+    {
+        return;
+    }
+    idCurrentMusic = ui->tableMusic->item(currentRow, currentColumn)->data(Qt::UserRole).toString();
+    ui->lineEdit->setText(ui->tableMusic->item(currentRow, currentColumn)->text());
+}
+
+void MainScreen::treatCheck()
+{
+
 }
 
 void MainScreen::LoadList()
