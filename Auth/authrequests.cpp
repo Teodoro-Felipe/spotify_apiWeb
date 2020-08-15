@@ -121,21 +121,22 @@ void AuthRequests::delMusicPlayList(QString uriMusic, QString playList, AuthRequ
         return;
     }
 
-    QVariantMap mp;
 
-    QJsonArray people;
-     QJsonObject bob;
-     bob.insert("uri", "spotify:track:"+uriMusic);
+    QNetworkAccessManager *m_nam = new QNetworkAccessManager;
+    QNetworkRequest request( QUrl("https://api.spotify.com/v1/playlists/"+ playList +"/tracks"));
+      request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+      request.setRawHeader(QByteArray("Authorization"), QByteArray("Bearer "+ Auth->token().toUtf8()));
 
-     people.push_back(bob);
+      QJsonArray array;
+      QJsonObject obj1;
+      obj1.insert("uri","spotify:track:"+uriMusic);
 
-     mp.insert("tracks", people);
-    QByteArray array;
+      array.append(obj1);
 
-    qDebug() << QJsonDocument::fromVariant(mp);
-    QUrl url("https://api.spotify.com/v1/playlists/"+ playList +"/tracks");
-    QNetworkRequest req = QNetworkRequest(url);
-    auto reply = deleteReimplement(req, QJsonDocument(people).toJson());
+      QJsonObject obj;
+      obj.insert("tracks", array);
+
+    auto reply = m_nam->sendCustomRequest(request,"DELETE",QJsonDocument(obj).toJson());
 
     connect (reply, &QNetworkReply::finished, [=]()
     {
