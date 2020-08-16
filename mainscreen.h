@@ -9,6 +9,7 @@ class MainScreen;
 }
 
 class AuthRequests;
+class LogsHelpers;
 
 class MainScreen : public QDialog
 {
@@ -44,6 +45,8 @@ private:
     Ui::MainScreen *ui;
 
     std::shared_ptr<AuthRequests> authRequest;
+    LogsHelpers *logs;
+
     std::atomic_bool userIsReady;
 
     QString idCurrentMusic;

@@ -11,6 +11,7 @@ INCLUDEPATH+= $$PWD\lib\include
 
 SOURCES += \
     Auth/authrequests.cpp \
+    logs/logshelpers.cpp \
     main.cpp \
     initauth.cpp \
     mainscreen.cpp
@@ -19,6 +20,7 @@ HEADERS += \
     Auth/authrequests.h \
     Auth/defines.h \
     initauth.h \
+    logs/logshelpers.h \
     mainscreen.h
 
 FORMS += \

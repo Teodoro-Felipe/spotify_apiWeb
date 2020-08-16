@@ -5,8 +5,10 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDesktopServices>
+#include <QMessageBox>
 
 #include "Auth/authrequests.h"
+#include "logs/logshelpers.h"
 
 MainScreen::MainScreen(std::shared_ptr<AuthRequests> auth, QWidget *parent) :
     QDialog(parent),
@@ -14,6 +16,8 @@ MainScreen::MainScreen(std::shared_ptr<AuthRequests> auth, QWidget *parent) :
     authRequest(std::move(auth))
 {
     ui->setupUi(this);
+
+    logs = new LogsHelpers;
 
     userIsReady.store(false);
 
@@ -25,13 +29,12 @@ MainScreen::MainScreen(std::shared_ptr<AuthRequests> auth, QWidget *parent) :
     connect(ui->tablePlayList, &QTableWidget::currentCellChanged, this, &MainScreen::treatSelPlayList);
     connect(ui->tableMusic, &QTableWidget::currentCellChanged, this, &MainScreen::treatSelMusic);
 
-    //connect(ui->)
-
     getInfoUser();
 }
 
 MainScreen::~MainScreen()
 {
+    delete logs;
     delete ui;
 }
 
@@ -42,6 +45,7 @@ void MainScreen::treatCriarPlay()
         Structs::PlayList playList;
         if(ui->lineEdit->text().isEmpty())
         {
+            logs->logsUserFail(this, "Nenhuma nome foi escolhido!");
             return;
         }
         QString txtLine = ui->lineEdit->text();
@@ -53,11 +57,13 @@ void MainScreen::treatCriarPlay()
             if(ret < 0)
             {
                 Q_UNUSED(data)
-                qDebug() << "Erro ao criar play list";
+                logs->logsUserFail(this, "Ocorreu um Problema ao tentar Criar a Playlist");
+                return;
             }
 
             ui->lineEdit->clear();
             LoadList();
+            logs->logsUserSucess(this, "PlayList Criada!");
         });
     }
 }
@@ -68,6 +74,7 @@ void MainScreen::treatAddMusic()
     {
         if(idCurrentMusic.isEmpty() || idCurrentPlayList.isEmpty())
         {
+            logs->logsUserFail(this, "Nenhuma musica ou playlist Selecionada!");
             return;
         }
 
@@ -76,11 +83,14 @@ void MainScreen::treatAddMusic()
             if(ret < 0)
             {
                 Q_UNUSED(data)
-                qDebug() << "Erro ao adicionar musica a playlist";
+                logs->logsUserFail(this, "Ocorreu um Problema ao tentar Adicionar a Musica");
+                return;
             }
 
             ui->lineEdit->clear();
             idCurrentMusic.clear();
+
+            logs->logsUserSucess(this, "Musica Adicionada!");
         });
     }
 }
@@ -91,6 +101,7 @@ void MainScreen::treatDelMusic()
     {
         if(idCurrentMusic.isEmpty() || idCurrentPlayList.isEmpty())
         {
+            logs->logsUserFail(this, "Nenhuma musica ou playlist Selecionada!");
             return;
         }
 
@@ -98,9 +109,14 @@ void MainScreen::treatDelMusic()
         {
             if(ret < 0)
             {
-                Q_UNUSED(data)
-                qDebug() << "Erro ao criar play list";
+                logs->logsUserFail(this, "Ocorreu um Problema ao tentar Deletar a Musica");
+                return;
             }
+            ui->lineEdit->clear();
+            ui->tableMusic->clear();
+            idCurrentMusic.clear();
+
+            logs->logsUserSucess(this, "Musica Deletada!");
         });
     }
 }
@@ -111,7 +127,7 @@ void MainScreen::treatExecPlayList()
     {
         if(ui->lineEdit->text().isEmpty() || idCurrentMusic.isEmpty())
         {
-            qDebug() << "Error";
+            logs->logsUserFail(this, "Nenhuma musica Selecionada!");
             return;
         }
 
@@ -120,8 +136,10 @@ void MainScreen::treatExecPlayList()
             if(ret < 0)
             {
                 Q_UNUSED(data)
-                qDebug() << "Erro ao play music";
+                logs->logsUserFail(this, "Ocorreu um Problema ao tentar Tocar a Musica");
+                return;
             }
+            logs->logsUserSucess(this, "Tocando Musica Solicitada!");
         });
     }
 }
@@ -135,18 +153,16 @@ void MainScreen::treatSearchMusic()
         {
             if(ret < 0)
             {
-                qDebug() << "Erro ao get Music";
+                logs->logsUserFail(this,"Ocorreu um Problema ao Buscar Musica");
                 return;
             }
 
             QJsonDocument document = QJsonDocument::fromJson(data);
             QJsonObject obj = document.object();
             QJsonObject obj2 = obj.value("tracks").toObject();
-
             QJsonArray array = obj2.value("items").toArray();
 
             ui->tableMusic->clearContents();
-
             ui->tableMusic->setRowCount(array.size());
             for(int i = 0; i < array.size(); i++)
             {
@@ -157,6 +173,7 @@ void MainScreen::treatSearchMusic()
                 item->setData(Qt::UserRole, array[i].toObject().value("id").toString());
                 ui->tableMusic->setItem(i, 0, item);
             }
+            logs->logsUserSucess(this,"Sucesso, Musicas Encontradas!");
         });
     }
 }
@@ -168,6 +185,7 @@ void MainScreen::treatSelPlayList(int currentRow, int currentColumn, int previou
 
     if(currentRow < 0)
     {
+        logs->logsInternos("Ocorreu um Problema ao Selecionar PlayList");
         return;
     }
     idCurrentPlayList = ui->tablePlayList->item(currentRow, currentColumn)->data(Qt::UserRole).toString();
@@ -176,6 +194,7 @@ void MainScreen::treatSelPlayList(int currentRow, int currentColumn, int previou
     {
         if(ret < 0)
         {
+            logs->logsUserFail(this, "Ocorreu um Problema ao Buscar Musicas da PlayList");
             return;
         }
         QJsonDocument document = QJsonDocument::fromJson(data);
@@ -206,15 +225,11 @@ void MainScreen::treatSelMusic(int currentRow, int currentColumn, int previousRo
 
     if(currentRow < 0)
     {
+        logs->logsInternos("Ocorreu um Problema ao Selecionar Musica");
         return;
     }
     idCurrentMusic = ui->tableMusic->item(currentRow, currentColumn)->data(Qt::UserRole).toString();
     ui->lineEdit->setText(ui->tableMusic->item(currentRow, currentColumn)->text());
-}
-
-void MainScreen::treatCheck()
-{
-
 }
 
 void MainScreen::LoadList()
@@ -238,7 +253,9 @@ void MainScreen::LoadList()
                     item->setData(Qt::UserRole, array[i].toObject().value("id").toString());
                     ui->tablePlayList->setItem(i, 0, item);
                 }
+                return;
             }
+            logs->logsUserFail(this, "Ocorreu um Problema ao Carregar suas Play Lists");
         });
     }
 }
@@ -248,10 +265,13 @@ void MainScreen::getInfoUser()
     authRequest->getInfoUser([=](int ret, QByteArray data)
     {
         Q_UNUSED(data)
-        if(ret >= 0)
+        if(ret < 0)
         {
-            userIsReady.store(true);
-            LoadList();
+            logs->logsUserFail(this, "Ocorreu um Problema ao Buscar informações do usuário");
+            close();
+            return;
         }
+        userIsReady.store(true);
+        LoadList();
     });
 }
