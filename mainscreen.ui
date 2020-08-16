@@ -149,14 +149,14 @@
   <widget class="QLabel" name="labelName">
    <property name="geometry">
     <rect>
-     <x>170</x>
+     <x>200</x>
      <y>3</y>
      <width>181</width>
      <height>16</height>
     </rect>
    </property>
    <property name="text">
-    <string>Nome da PlayList</string>
+    <string>Nome</string>
    </property>
   </widget>
   <widget class="QTableWidget" name="tableMusic">

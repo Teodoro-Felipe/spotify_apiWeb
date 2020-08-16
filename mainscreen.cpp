@@ -113,7 +113,8 @@ void MainScreen::treatDelMusic()
                 return;
             }
             ui->lineEdit->clear();
-            ui->tableMusic->clear();
+            treatSelPlayList(ui->tableMusic->currentRow(),0,0,0);
+
             idCurrentMusic.clear();
 
             logs->logsUserSucess(this, "Musica Deletada!");
