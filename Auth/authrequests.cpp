@@ -265,34 +265,6 @@ void AuthRequests::createPlayList(Structs::PlayList playList, AuthRequests::func
     });
 }
 
-QNetworkReply *AuthRequests::deleteReimplement(const QNetworkRequest &request, const QByteArray &data)
-{
-    QBuffer *buffer = new QBuffer;
-    buffer->setData(data);
-    buffer->open(QIODevice::ReadOnly);
-    QNetworkAccessManager manager;
-
-    QNetworkReply *reply = manager.post(request, buffer);
-    buffer->setParent(reply);
-    return reply;
-}
-
-QNetworkRequest AuthRequests::createRequest(QUrl url, const QVariantMap *parameters)
-{
-//    QNetworkRequest req;
-//     req.postProcess(createRequest(QNetworkAccessManager::PostOperation, request, data));
-
-//    QUrlQuery query(url.query());
-//    QNetworkRequest request;
-//    if (parameters) {
-//        for (auto it = parameters->begin(), end = parameters->end(); it != end; ++it)
-//            query.addQueryItem(it.key(), it.value().toString());
-//        url.setQuery(query);
-
-//        qDebug() << url;
-//    }
-}
-
 void AuthRequests::callbackAuth()
 {
     bool status = Auth->status() == QAbstractOAuth::Status::Granted ? true : false;
